@@ -1,0 +1,11 @@
+# Security headers for the static host (Cloudflare Pages / Netlify read this file; it is not served).
+/*
+  Content-Security-Policy: default-src 'none'; script-src 'sha256-hL6HI/gOnDkiqnHQmluPecelFJzniDF2hvTyJ1R31z8='; style-src 'sha256-HE4v+ekLQqAkKymOfPaCdQHa5fLE5Uuvd8TgVLpBEwo='; img-src data:; connect-src https://dns.google https://cloudflare-dns.com; base-uri 'none'; form-action 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; manifest-src 'none'; require-trusted-types-for 'script'; trusted-types 'none'; frame-ancestors 'none'
+  Strict-Transport-Security: max-age=31536000
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: no-referrer
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Resource-Policy: same-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()
+  Cache-Control: public, max-age=0, must-revalidate
