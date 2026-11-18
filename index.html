@@ -2,12 +2,12 @@
 <html lang="th">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-8qT7x4A7/W03JSwNxA8PkQLD5c56rngQrYC8s05WSNE='; style-src 'sha256-niibIPoVEEcEXkcgaPPLkqgL8QXOG7NuUWnHSoCeCcQ='; img-src data:; connect-src https://dns.google https://cloudflare-dns.com https://www.virustotal.com; base-uri 'none'; form-action 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; manifest-src 'none'; require-trusted-types-for 'script'; trusted-types 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-MBTWhyGTkNZEB5wqVBGo3MtcCpkn5ZdeucEF1bTibak='; style-src 'sha256-niibIPoVEEcEXkcgaPPLkqgL8QXOG7NuUWnHSoCeCcQ='; img-src data:; connect-src https://dns.google https://cloudflare-dns.com https://www.virustotal.com; base-uri 'none'; form-action 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; manifest-src 'none'; require-trusted-types-for 'script'; trusted-types 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="referrer" content="no-referrer">
 <meta name="color-scheme" content="dark light">
 <meta name="theme-color" content="#0a0e14">
-<meta name="description" content="Argus — static malware, link, IP and hash scanner that runs entirely in your browser. Build 2026-11-16.">
+<meta name="description" content="Argus — static malware, link, IP and hash scanner that runs entirely in your browser. Build 2026-11-18.">
 <title>Argus · File, Link &amp; IP Scanner</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230a0e14'/%3E%3Cpath d='M4.5 16s4.2-8 11.5-8 11.5 8 11.5 8-4.2 8-11.5 8S4.5 16 4.5 16z' fill='none' stroke='%2334d3b0' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='4.4' fill='%2334d3b0'/%3E%3Ccircle cx='16' cy='16' r='1.7' fill='%230a0e14'/%3E%3C/svg%3E">
 <style>/* ================= Argus : design tokens ================= */
@@ -1106,7 +1106,7 @@ function decodeIntel(b64) {
 }
 const INTEL = decodeIntel(INTEL_ENC);
 const CUSTOM = { rules: [], iocs: new Map() };
-const BUILD_DATE = '2026-11-16';
+const BUILD_DATE = '2026-11-18';
 const EMBED = /*__EMBED__*/false; // true only in the hosted build, which runs inside claude.ai's locked-down frame
 const CATS = ['test', 'ransomware', 'trojan', 'rat', 'stealer', 'miner', 'botnet', 'webshell', 'macro', 'exploit', 'hacktool', 'script', 'phishing', 'packed', 'android', 'masq', 'spyware', 'wiper', 'suspicious', 'info'];
 const store = {
@@ -1213,8 +1213,10 @@ function snipOf(buf, start, mlen) {
   const hx = []; for (let i = s; i < e; i++) hx.push(HX[buf[i]]);
   return { hex: hx.join(' '), ascii: asciiOf(buf, s, e), pre, mlen: Math.min(mlen, e - s - pre) };
 }
+/* neutralises control, bidi-override and invisible characters (zero-width, LRM/RLM, soft hyphen, BOM, line/paragraph separators) so a hostile name cannot spoof what the analyst reads */
+const RE_UNSAFE_CH = /[\u0000-\u001f\u007f-\u009f\u00ad\u061c\u180e\u200b-\u200f\u2028-\u202e\u2060-\u206f\ufeff\ufff9-\ufffb]/g;
 function cleanStr(s, max = 200) {
-  s = String(s).replace(/[\u0000-\u001f\u007f-\u009f‪-‮⁦-⁩]/g, c => '\\x' + hex(c.charCodeAt(0), 2));
+  s = String(s).replace(RE_UNSAFE_CH, c => { const n = c.charCodeAt(0); return n > 0xff ? '\\u' + n.toString(16).padStart(4, '0') : '\\x' + hex(n, 2); });
   return s.length > max ? s.slice(0, max) + '…' : s;
 }
 function shannon(hist, n) {
@@ -3566,7 +3568,7 @@ D('eng.what.hash', 'แฮช SHA-256', 'the SHA-256 hash'); D('eng.what.url', '
 D('eng.sent', 'สิ่งที่จะถูกส่ง: {v}', 'What will be sent: {v}'); D('eng.key', 'API key ของ VirusTotal', 'VirusTotal API key'); D('eng.key.ph', 'วางคีย์ที่นี่ (64 ตัวอักษร)', 'Paste your key here (64 characters)');
 D('eng.key.how', 'สมัครฟรีที่ virustotal.com แล้วเปิดหน้าโปรไฟล์ → API key (ใช้ได้ไม่เชิงพาณิชย์ จำกัด 4 ครั้งต่อนาที และ 500 ครั้งต่อวัน)', 'Sign up free at virustotal.com, then Profile → API key (non-commercial use; limited to 4 requests/minute and 500/day).');
 D('eng.key.remember', 'จำคีย์ไว้ในเครื่องนี้ (เก็บใน localStorage ของเบราว์เซอร์)', 'Remember the key on this device (stored in browser localStorage)'); D('eng.key.forget', 'ลบคีย์ที่จำไว้', 'Forget the saved key');
-D('eng.key.note', 'คีย์ใช้ในเบราว์เซอร์นี้เท่านั้น ถ้าไม่ติ๊กจำ จะหายเมื่อปิดหน้านี้', 'The key stays in this browser. If you do not tick remember, it is gone when you close the page.');
+D('eng.key.shared', 'เว็บนี้อยู่บนโดเมน github.io ซึ่งใช้พื้นที่เก็บข้อมูลร่วมกับเว็บอื่นของบัญชีเดียวกัน จึงปิดการจำคีย์ไว้เพื่อความปลอดภัย (ใช้ได้เฉพาะรอบนี้ หรือใช้ลิงก์ Cloudflare แทน)', 'This site runs on github.io, which shares browser storage with every other site of the same account, so remembering the key is turned off for your safety (the key is used for this visit only, or use the Cloudflare link instead).'); D('eng.key.note', 'คีย์ใช้ในเบราว์เซอร์นี้เท่านั้น ถ้าไม่ติ๊กจำ จะหายเมื่อปิดหน้านี้', 'The key stays in this browser. If you do not tick remember, it is gone when you close the page.');
 D('eng.go', 'ค้นหาที่ VirusTotal', 'Look up on VirusTotal'); D('eng.busy', 'กำลังถาม VirusTotal…', 'Asking VirusTotal…'); D('eng.again', 'ถามใหม่', 'Look up again');
 D('eng.err.nokey', 'ใส่ API key ก่อน', 'Enter an API key first'); D('eng.err.key', 'VirusTotal ไม่รับคีย์นี้ ตรวจว่าคัดลอกครบ', 'VirusTotal rejected this key. Check that it was copied completely.');
 D('eng.err.quota', 'ใช้โควตาเกินแล้ว (4 ครั้ง/นาที หรือ 500 ครั้ง/วัน) รอสักครู่แล้วลองใหม่', 'Quota exceeded (4/minute or 500/day). Wait a moment and try again.');
@@ -3590,7 +3592,7 @@ D('eng.csp', 'หน้านี้ต้องอนุญาต virustotal.com
 /* ================= report.js : HTML / JSON / CSV / text export (everything escaped) ================= */
 const VCOL = { clean: '#17803d', low: '#5b7f12', suspicious: '#b45309', malicious: '#c2410c', critical: '#b91c1c', test: '#1d62c7', unknown: '#5b6b7b' };
 const SCOL = { crit: '#b91c1c', high: '#c2410c', med: '#b45309', low: '#5b7f12', info: '#5b6b7b' };
-const esc = s => String(s == null ? '' : s).replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f-\u009f‪-‮⁦-⁩]/g, '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+const esc = s => String(s == null ? '' : s).replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f-\u009f\u00ad\u061c\u180e\u200b-\u200f\u2028-\u202e\u2060-\u206f\ufeff\ufff9-\ufffb]/g, '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;').replace(/'/g, '&#39;');
 
 function defangAny(kind, v) {
   v = String(v);
@@ -3711,7 +3713,7 @@ function buildCsv(r) {
   if (r.kind === 'hash') for (const i of (r.items || [])) rows.push([i.hash, 'hash', i.match ? r.verdict : 'unknown', r.score, i.match ? 'crit' : '', i.match ? i.match.n : '', i.match ? i.match.cat : '', 'ioc', '', '', '', '', '', '', i.algo || 'invalid', '']);
   else if (!fs.length) rows.push([...base, '', '', '', '', '', '', '', '', '', '', '']);
   else for (const f of fs) { const w = f.where || {}; rows.push([...base, f.sev, f.name, f.cat, f.layer, w.path || '', w.entry || '', w.section || '', w.off !== undefined ? '0x' + hex(w.off) : '', w.line || '', w.part || '', describe(f), (f.att || []).join(' ')]); }
-  return '﻿' + rows.map(rw => rw.map(csvCell).join(',')).join('\r\n') + '\r\n';
+  return '\ufeff' + rows.map(rw => rw.map(csvCell).join(',')).join('\r\n') + '\r\n';
 }
 const buildJson = r => JSON.stringify(slimResult(r), null, 2);
 function buildSummaryText(r) {
@@ -4374,8 +4376,14 @@ function paneCode(r) {
 }
 
 /* ================= Multi-engine ================= */
+/* *.github.io project pages share ONE origin (so one localStorage) with every other project of the same account: never keep a key there */
+const SHARED_ORIGIN = (() => { try { return /(^|\.)github\.io$/i.test(location.hostname); } catch (e) { return false; } })();
 function vtState() {
-  if (!S.vt || S.vt.res !== S.res) S.vt = { res: S.res, key: S.vtKey || '', busy: false, out: null, all: false, remember: !!store.get('argus.vtkey') };
+  if (!S.vt || S.vt.res !== S.res) {
+    if (SHARED_ORIGIN) store.del('argus.vtkey');
+    const saved = SHARED_ORIGIN ? '' : String(store.get('argus.vtkey') || '').slice(0, 128);
+    S.vt = { res: S.res, key: S.vtKey || saved, busy: false, out: null, all: false, remember: !!saved };
+  }
   return S.vt;
 }
 const LAYER_SHOW = { file: ['sig', 'heur', 'struct', 'deob', 'arch', 'ioc'], net: ['net', 'ioc'] };
@@ -4391,7 +4399,7 @@ function engErr(e) { return e.err === 'other' ? t('eng.err.other', { c: e.code }
 async function doVt(r, tg, vs) {
   const key = vs.key.trim(); S.vtKey = key;
   if (!key) { vs.err = t('eng.err.nokey'); rerender(); return; }
-  if (vs.remember) store.set('argus.vtkey', key); else store.del && store.del('argus.vtkey');
+  if (vs.remember && !SHARED_ORIGIN) store.set('argus.vtkey', key); else store.del('argus.vtkey');
   vs.busy = true; vs.err = ''; rerender();
   let o; try { o = await vtLookup(tg.kind, tg.id, key); } catch (e) { o = { ok: false, err: 'net' }; }
   if (S.vt !== vs) return; /* the person moved on to another result */
@@ -4426,7 +4434,7 @@ function paneEngines(r) {
     c.append(h('p', { class: 'sentbox' }, h('span', { class: 'lbl' }, t('eng.sent', { v: '' })), h('code', { class: 'mono brk' }, cleanStr(tg.id, 200))), tg.of > 1 ? h('p', { class: 'hint small' }, '1 / ' + tg.of) : null);
     const inp = h('input', { class: 'input mono', type: 'password', autocomplete: 'off', spellcheck: 'false', autocapitalize: 'off', placeholder: t('eng.key.ph'), value: vs.key, 'aria-label': t('eng.key'), disabled: vs.busy, oninput: e => { vs.key = e.target.value; } });
     c.append(h('label', { class: 'lbl blk' }, t('eng.key')), h('form', { class: 'qform', onsubmit: e => { e.preventDefault(); doVt(r, tg, vs); } }, inp, h('button', { class: 'btn primary', type: 'submit', disabled: vs.busy }, icon('scan', 18), h('span', null, vs.busy ? t('eng.busy') : t('eng.go')))));
-    c.append(h('label', { class: 'chk' }, h('input', { type: 'checkbox', checked: vs.remember, onchange: e => { vs.remember = e.target.checked; if (!vs.remember) store.del && store.del('argus.vtkey'); } }), h('span', null, t('eng.key.remember'))), h('p', { class: 'hint small' }, t('eng.key.how')), h('p', { class: 'hint small' }, t('eng.key.note')));
+    c.append(SHARED_ORIGIN ? h('p', { class: 'hint small' }, t('eng.key.shared')) : h('label', { class: 'chk' }, h('input', { type: 'checkbox', checked: vs.remember, onchange: e => { vs.remember = e.target.checked; if (!vs.remember) store.del('argus.vtkey'); } }), h('span', null, t('eng.key.remember'))), h('p', { class: 'hint small' }, t('eng.key.how')), h('p', { class: 'hint small' }, t('eng.key.note')));
     if (vs.err) c.append(h('div', { class: 'alert', role: 'alert' }, icon('alert', 18), h('span', null, vs.err)));
   }
   pane.append(c);
